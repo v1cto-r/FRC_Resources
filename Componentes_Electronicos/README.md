@@ -19,5 +19,5 @@ Para poder abrir los archivos de la actividad hay que seguir los siguentes pasos
 
  4. Completar el cableado, una vez hecho descargar el diagrama completado, dentro de menú (Al igual que al abrir), seleccionar "Save To" para guardarlo, de preferencia guardenlo con su nombre para identificar las distintas entregas.
 
-5. Después de haber hecho los 3 diagramas, porfavor subanlos al siguiente google drive, respetando el resto de entregas y sin ovlidar su nombre. [Link al drive aquí.](https://drive.google.com/drive/folders/1lrLBPUwfml1vv5w2z9EZMJgO0MSX44mp?usp=sharing)
+5. Después de haber hecho los 3 diagramas, porfavor subanlos al google drive que les compartí, respetando el resto de entregas y sin ovlidar su nombre. 
 
