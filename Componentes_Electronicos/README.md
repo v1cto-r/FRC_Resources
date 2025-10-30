@@ -5,6 +5,7 @@ Tanto de busqueda como las actividades.
 
 Otros recursos:
 [Cableado de wpilib](https://docs.wpilib.org/es/stable/docs/zero-to-robot/step-1/intro-to-frc-robot-wiring.html)
+[Codigos de color de componentes](https://docs.wpilib.org/es/stable/docs/hardware/hardware-basics/status-lights-ref.html)
 
 Para poder abrir los archivos de la actividad hay que seguir los siguentes pasos:
 
