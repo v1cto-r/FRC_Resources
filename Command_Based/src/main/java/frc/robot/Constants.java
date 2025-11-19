@@ -38,9 +38,6 @@ public final class Constants {
 
       public static final int kEncoderID = 0;
 
-      public static final Angle kArmUpperLimit = Degrees.of(90);
-      public static final Angle kArmLowerLimit = Degrees.of(0);
-
       public static final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(0,0);
       public static final ProfiledPIDController kArmPIDController = new ProfiledPIDController(
         0,0,0, constraints

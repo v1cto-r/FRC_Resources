@@ -19,42 +19,43 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import frc.robot.Constants.SubsystemConstants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
-  private final SparkMax m_IntakeMotor;
-  private final SparkMaxConfig m_IntakeMotorConfig;
-  private final DigitalInput m_pieceDetector;
-  private boolean hasPiece;
-
+  // Declarar el motor y el sensor
+  private final SparkMax m_MotorIntake;
+  private final SparkMaxConfig m_ConfiguracionMotorIntake;
+  private final DigitalInput m_DetectorPieza;
+  private boolean tienePieza;
 
   public Intake() {
-    this.m_IntakeMotor = new SparkMax(IntakeConstants.kIntakeControllerID, MotorType.kBrushless);
-    this.m_IntakeMotorConfig = new SparkMaxConfig();
-    this.m_pieceDetector  = new DigitalInput(IntakeConstants.kIntakeLimitSwitchID);
+    this.m_MotorIntake = new SparkMax(IntakeConstants.kIntakeControllerID, MotorType.kBrushless);
+    this.m_ConfiguracionMotorIntake = new SparkMaxConfig();
+    this.m_DetectorPieza = new DigitalInput(IntakeConstants.kIntakeLimitSwitchID);
 
-    this.m_IntakeMotorConfig
+    this.m_ConfiguracionMotorIntake
     .smartCurrentLimit(40)
+    .inverted(false) // Podrian agregar esta configuracion
     .idleMode(IdleMode.kBrake);
 
-    this.m_IntakeMotor.configure(this.m_IntakeMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    this.m_MotorIntake.configure(m_ConfiguracionMotorIntake, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  public boolean getHasPiece() {
-    return this.hasPiece;
+  public boolean getTienePieza() {
+    return this.tienePieza;
   }
 
-  public void setIntakeMotorVoltage(int voltage) {
-    this.m_IntakeMotor.setVoltage(voltage);
+  public void setIntakeVoltage(int voltage) {
+    this.m_MotorIntake.setVoltage(voltage);
   }
 
   public void setMotorIn() {
-    this.setIntakeMotorVoltage(8);
+    setIntakeVoltage(8);
   }
 
   public void setMotorOut() {
-    this.setIntakeMotorVoltage(-4);
+    setIntakeVoltage(-6);
   }
 
   public void stopMotor() {
-    this.setIntakeMotorVoltage(0);
+    setIntakeVoltage(0);
   }
 
   public Command setMotorInCommand() {
@@ -69,14 +70,14 @@ public class Intake extends SubsystemBase {
     return runOnce(this::stopMotor);
   }
 
-  public Command intakePieceCommand() {
-    return new RunCommand(this::setMotorIn, this).until(this::getHasPiece).andThen(this::stopMotor);
+  public Command guardarPieza() {
+    return new RunCommand(this::setMotorIn).until(this::getTienePieza).andThen(this::stopMotor);
   }
+
+  // Funciones
 
   @Override
   public void periodic() {
-    this.hasPiece = this.m_pieceDetector.get();
-
-    SmartDashboard.putBoolean("Intake/tienePieza", hasPiece);
+    this.tienePieza = m_DetectorPieza.get();
   }
 }

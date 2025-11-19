@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.SubsystemConstants;
 import frc.robot.Constants.SubsystemConstants.ArmConstants;
+import frc.robot.Constants.SubsystemConstants.IntakeConstants;
 
 public class Arm extends SubsystemBase {
 
@@ -42,105 +43,77 @@ public class Arm extends SubsystemBase {
     }
   }
 
+  private final SparkMax m_Motor1;
+  private final SparkMax m_Motor2;
+  private final SparkMax m_Motor3;
 
-  private final SparkMax m_ArmMotor1;
-  private final SparkMax m_ArmMotor2;
-  private final SparkMax m_ArmMotor3;
-
-  private final SparkMaxConfig m_LeaderConfig;
-  private final SparkMaxConfig m_Follower1Config;
-  private final SparkMaxConfig m_Follower2Config;
+  private final SparkMaxConfig m_ConfiguracionMotor1;
+  private final SparkMaxConfig m_ConfiguracionMotor2;
+  private final SparkMaxConfig m_ConfiguracionMotor3;
 
   private final CANcoder m_encoder;
   private Angle setPoint;
-  private boolean pidEnabled = false;
 
 
   public Arm() {
-    this.m_ArmMotor1 = new SparkMax(ArmConstants.kArmControllerID1, MotorType.kBrushless);
-    this.m_ArmMotor2 = new SparkMax(ArmConstants.kArmControllerID2, MotorType.kBrushless);
-    this.m_ArmMotor3 = new SparkMax(ArmConstants.kArmControllerID3, MotorType.kBrushless);
+    this.m_Motor1 = new SparkMax(ArmConstants.kArmControllerID1, MotorType.kBrushless);
+    this.m_Motor2 = new SparkMax(ArmConstants.kArmControllerID2, MotorType.kBrushless);
+    this.m_Motor3 = new SparkMax(ArmConstants.kArmControllerID3, MotorType.kBrushless);
 
-    this.m_LeaderConfig = new SparkMaxConfig();
-    this.m_Follower1Config = new SparkMaxConfig();
-    this.m_Follower2Config = new SparkMaxConfig();
+    this.m_ConfiguracionMotor1 = new SparkMaxConfig();
+    this.m_ConfiguracionMotor2 = new SparkMaxConfig();
+    this.m_ConfiguracionMotor3 = new SparkMaxConfig();
 
-    this.m_LeaderConfig
+    this.m_ConfiguracionMotor1
     .smartCurrentLimit(40)
-    .idleMode(IdleMode.kBrake)
-    .inverted(false);
+    .inverted(false) // Podrian agregar esta configuracion
+    .idleMode(IdleMode.kBrake);
 
-    this.m_Follower1Config
+    this.m_ConfiguracionMotor2
     .smartCurrentLimit(40)
+    .inverted(false) // Podrian agregar esta configuracion
     .idleMode(IdleMode.kBrake)
-    .inverted(true)
-    .follow(m_ArmMotor1);
+    .follow(m_Motor1);
 
-    this.m_Follower2Config
+    this.m_ConfiguracionMotor3
     .smartCurrentLimit(40)
+    .inverted(false) // Podrian agregar esta configuracion
     .idleMode(IdleMode.kBrake)
-    .inverted(false)
-    .follow(m_ArmMotor1);
+    .follow(m_Motor1);
 
-    m_ArmMotor1.configure(m_LeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_ArmMotor2.configure(m_Follower1Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_ArmMotor3.configure(m_Follower2Config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    this.m_Motor1.configure(m_ConfiguracionMotor1, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    this.m_Motor2.configure(m_ConfiguracionMotor2, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    this.m_Motor3.configure(m_ConfiguracionMotor3, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    this.m_encoder = new CANcoder(ArmConstants.kEncoderID, SubsystemConstants.kCanivoreBus);
+    this.m_encoder = new CANcoder(ArmConstants.kEncoderID, SubsystemConstants.kRioBus);
 
     this.setPoint = ArmPosition.HIGH.getPosition();
   }
 
   public Angle getAngle() {
-    return Rotations.of(m_encoder.getAbsolutePosition().getValueAsDouble());
+    return Rotations.of(this.m_encoder.getAbsolutePosition().getValueAsDouble());
   }
 
-  public boolean atSetpoint() {
+  public boolean enPosicion() {
     return ArmConstants.kArmPIDController.atSetpoint();
   }
 
-  private void setSetpoint(ArmPosition angle) {
-    this.setPoint = Radians.of(
-      MathUtil.clamp(
-        angle.getPosition().in(Radians), 
-        ArmConstants.kArmLowerLimit.in(Radians), 
-        ArmConstants.kArmUpperLimit.in(Radians)
-      )
-    );
+  public void setSetpoint (Angle angulo) {
+    this.setPoint = angulo;
   }
 
-  private void setSetpoint(Angle angle) {
-    this.setPoint = Radians.of(
-      MathUtil.clamp(
-        angle.in(Radians), 
-        ArmConstants.kArmLowerLimit.in(Radians), 
-        ArmConstants.kArmUpperLimit.in(Radians)
-      )
-    );
+  public Command setSetpointCommand(Angle angulo) {
+    return runOnce(() -> setSetpoint(angulo)).until(this::enPosicion);
   }
 
-  public Command setSetpointCommand(Angle angle) {
-    return runOnce(() -> setSetpoint(angle)).until(this::atSetpoint);
-  }
-
-  public Command setSetpointCommand(ArmPosition angle) {
-    return runOnce(() -> setSetpoint(angle)).until(this::atSetpoint);
-  }
 
   @Override
   public void periodic() {
-    double setPointRadians = this.setPoint.in(Radians);
-    double currentAngleRadians = this.getAngle().in(Radians);
+    double setPointGrados = this.setPoint.in(Degrees);
+    double anguloActualGrados = this.getAngle().in(Degrees);
 
-    double resultVoltage = ArmConstants.kArmPIDController.calculate(setPointRadians, currentAngleRadians);
-
-    if (pidEnabled) m_ArmMotor1.setVoltage(resultVoltage);
-    else m_ArmMotor1.setVoltage(0);
-
-    SmartDashboard.putBoolean("Arm/enSetpoint", this.atSetpoint());
-    SmartDashboard.putNumber("Arm/setpointGrados", this.setPoint.in(Degrees));
-    SmartDashboard.putNumber("Arm/anguloActualGrados", this.getAngle().in(Degrees));
-    SmartDashboard.putNumber("Arm/voltajeSalida", resultVoltage);
-
+    double voltajeResultante = ArmConstants.kArmPIDController.calculate(anguloActualGrados, setPointGrados);
+    
+    m_Motor1.setVoltage(voltajeResultante);
   }
 }
