@@ -11,6 +11,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import static edu.wpi.first.units.Units.*;
+
+import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import frc.robot.util.PIDFConstants;
 
@@ -127,5 +129,22 @@ public class Constants {
             .setTurningMotorID(18)
             .setAbsoluteEncoderCANDevice(24)
             .setName("Back Right");
+    }
+
+
+    public static class AutoConstants {
+        public static RobotConfig config = getAutoConfig();
+
+    }
+
+    public static RobotConfig getAutoConfig() {
+        try{
+            RobotConfig config = RobotConfig.fromGUISettings();
+            return config;
+        } catch (Exception e) {
+            // Handle exception as needed
+            e.printStackTrace();
+            return null;
+        }
     }
 }

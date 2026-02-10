@@ -3,6 +3,7 @@ package frc.robot.subsystems.Swerve;
 import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -15,11 +16,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.Swerve.Constants.SwerveDriveConstants;
 import frc.robot.subsystems.Swerve.Constants.SwerveModuleConstants;
+import frc.robot.subsystems.Swerve.Constants.AutoConstants;
 import frc.robot.subsystems.Swerve.SwerveModule;
 import frc.robot.util.SpeedAlterator.SpeedAlterator;
 import frc.robot.subsystems.Gyro.Gyro;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import org.littletonrobotics.junction.Logger;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 public class SwerveDrive extends SubsystemBase {
     // * Swerve modules
@@ -60,6 +66,7 @@ public class SwerveDrive extends SubsystemBase {
 
         //! ENCODERS ARE RESET IN EACH MODULE
         //! DO NOT RESET THEM HERE IN THE CONSTRUCTOR
+
     }
 
     /**
@@ -205,6 +212,17 @@ public class SwerveDrive extends SubsystemBase {
         this.drivingRobotRelative = true;
         ChassisSpeeds Speeds = new ChassisSpeeds(xSpeed, ySpeed, rotSpeed);
         this.drive(Speeds);
+    }
+
+        /**
+     * Drive the robot with the provided speeds <b>(ROBOT RELATIVE)</b>
+     * @param xSpeed
+     * @param ySpeed
+     * @param rotSpeed
+     */
+    public void driveRobotRelative(ChassisSpeeds speeds) {
+        this.drivingRobotRelative = true;
+        this.drive(speeds);
     }
 
     /**
